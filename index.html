@@ -22,6 +22,84 @@
             overflow: hidden;
         }
 
+        /* Password Overlay Styles */
+        #passwordOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .password-container {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .password-container h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .password-container p {
+            margin-bottom: 30px;
+            font-size: 1.3em;
+            color: #555;
+        }
+
+        #passwordInput {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: 2px solid #667eea;
+            border-radius: 50px;
+            width: 300px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        #passwordInput:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .unlock-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .unlock-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        #errorMessage {
+            color: #ff6b6b;
+            margin-top: 20px;
+            font-size: 1.1em;
+            min-height: 24px;
+        }
+
+        /* Main Content Styles */
         .container {
             text-align: center;
             background: white;
@@ -30,6 +108,9 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
+            display: none;
+            /* Hidden by default */
+            animation: fadeIn 1s ease;
         }
 
         h1 {
@@ -85,11 +166,8 @@
         .no-btn {
             position: absolute;
             pointer-events: none;
-            /* prevents click */
             transition: transform 0.15s ease-out;
         }
-
-
 
         .celebration {
             display: none;
@@ -116,6 +194,19 @@
         .celebration-emoji {
             font-size: 5em;
             animation: rotate 2s infinite;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes pulse {
@@ -148,18 +239,6 @@
             }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         @keyframes bounceIn {
             0% {
                 transform: scale(0);
@@ -187,6 +266,22 @@
 
             75% {
                 transform: rotate(10deg);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
             }
         }
 
@@ -230,7 +325,22 @@
 </head>
 
 <body>
-    <div class="container">
+    <!-- Password Protection Overlay -->
+    <div id="passwordOverlay">
+        <div class="password-container">
+            <h2>🔐 Secret Message</h2>
+            <p>This is a special message just for you!<br>Enter the magic word to continue...</p>
+            <input type="password" id="passwordInput" placeholder="Enter the secret word">
+            <br>
+            <button class="unlock-btn" onclick="checkPassword()">
+                Unlock Love ❤️
+            </button>
+            <div id="errorMessage"></div>
+        </div>
+    </div>
+
+    <!-- Main Content (hidden until password is correct) -->
+    <div class="container" id="mainContent">
         <div id="question-screen">
             <h1>Hey There! 💕</h1>
             <div class="heart">❤️</div>
@@ -250,6 +360,82 @@
     </div>
 
     <script>
+        // ================================
+        // PASSWORD PROTECTION CODE
+        // ================================
+
+        // Array of accepted passwords - add as many as you want!
+        const CORRECT_PASSWORDS = ["Love123", "ILoveYou", "YesPlease", "Forever123", "OurSpecialWord"];
+        
+        // Or if you want case-insensitive comparison:
+        // const CORRECT_PASSWORDS = ["love123", "iloveyou", "yesplease", "forever123", "ourspecialword"];
+
+        // Password checking function
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const errorDiv = document.getElementById('errorMessage');
+
+            // Clear any previous error
+            errorDiv.textContent = '';
+            errorDiv.style.color = '#ff6b6b';
+
+            // Check if input matches ANY password in the array
+            if (CORRECT_PASSWORDS.includes(input)) {
+                // Success - hide password overlay
+                document.getElementById('passwordOverlay').style.opacity = '0';
+                document.getElementById('passwordOverlay').style.transition = 'opacity 0.5s ease';
+
+                // Show main content after a short delay
+                setTimeout(() => {
+                    document.getElementById('passwordOverlay').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+
+                    // Add initial animation
+                    document.getElementById('mainContent').style.animation = 'fadeIn 1s ease';
+                }, 500);
+
+            } else {
+                // Wrong password - show error with fun message
+                const messages = [
+                    "Oops! Not quite right! 💔",
+                    "Try again! Maybe something sweet? 🍬",
+                    "Nope! Hint: It's about feelings! 💖",
+                    "Almost! Think of romance! 🌹",
+                    "That's not it! Remember our special word?"
+                ];
+
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                errorDiv.textContent = randomMessage;
+
+                // Shake animation for wrong password
+                const container = document.querySelector('.password-container');
+                container.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    container.style.animation = '';
+                }, 500);
+
+                // Clear input
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+
+        // Allow pressing Enter to submit password
+        document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // Focus on password input when page loads
+        window.onload = function () {
+            document.getElementById('passwordInput').focus();
+        };
+
+        // ================================
+        // ORIGINAL DATING PROPOSAL CODE
+        // ================================
+
         const noBtn = document.getElementById('noBtn');
         const container = document.querySelector('.buttons');
 
@@ -294,7 +480,7 @@
             moveButtonAway(touch.clientX, touch.clientY);
         });
 
-        /* YES handler (unchanged) */
+        /* YES handler */
         function handleYes() {
             document.getElementById('question-screen').style.display = 'none';
             document.getElementById('celebration').classList.add('active');
@@ -334,8 +520,6 @@
             }, 300);
         }
     </script>
-
-
 </body>
 
 </html>
